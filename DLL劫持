@@ -1,0 +1,21 @@
+//例如:转发MessageBoxTest为MessageBoxA
+#pragma comment(linker,"/EXPORT:MessageBoxTest=user32.MessageBoxA")
+//当调用MessageBoxTest时,系统会将其直接转发给user32.MessageBoxA去执行
+
+
+//裸函数naked特性仅适用于x86和ARM，并不用于x64
+//_asm内联汇编也不能在x64中使用
+extern "C" void __declspec(naked) MessageBoxATest()
+{
+    PVOID pAddr=NULL;
+    HMODULE hDll=LoadLibraryA("C:\\Windows\\System32\\user32.dll");
+    if(NULL != hDll)
+    {
+        pAddr=GetProcAddress(hDll,"MessageBoxA");
+        if(pAddr)
+        {
+            _asm jmp pAddr
+        }
+        FreeLibrary(hDll);
+    }
+}
