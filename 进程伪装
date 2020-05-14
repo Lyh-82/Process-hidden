@@ -1,0 +1,36 @@
+__kernel_entry NTSTATUS NtQueryInformationProcess(
+  IN HANDLE           ProcessHandle,	//目标进程句柄
+  IN PROCESSINFOCLASS ProcessInformationClass,	//获取信息类型
+  OUT PVOID           ProcessInformation,	//指向调用应用程序提供的缓冲区的指针，函数将所请求的信息写入该缓冲区。
+  IN ULONG            ProcessInformationLength,//ProcessInformation缓冲区大小
+  OUT PULONG          ReturnLength //函数返回请求信息的大小
+);
+//当ProcessInformationClass 参数是ProcessBasicInformation，缓冲器指向的PROCESSINFORMATION参数应足够
+//大，以保持单个PROCESS_BASIC_INFORMATION具有下述布局结构：
+typedef struct _PROCESS_BASIC_INFORMATION {
+    PVOID Reserved1;
+    PPEB PebBaseAddress;	//指向PEB结构
+    PVOID Reserved2[2];
+    ULONG_PTR UniqueProcessId;	//指向该过程的唯一标识符。使用GetProcessId函数检索此信息。
+    PVOID Reserved3;
+} PROCESS_BASIC_INFORMATION;
+typedef NTSTATUS (WINAPI* pfnNtQueryInformationProcess)(
+  IN HANDLE           ProcessHandle,	
+  IN PROCESSINFOCLASS ProcessInformationClass,	
+  OUT PVOID           ProcessInformation,	
+  IN ULONG            ProcessInformationLength,
+  OUT PULONG          ReturnLength
+ );
+BOOL DisguiseProcess(DWORD dwProcessId, WCHAR* lpwszpath, WCHAR* lpwszCmd)
+{
+    //获取进程句柄
+    HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwProcessId);
+    if (!hProcess)
+	{
+		OutPutDebugStringA("进程句柄获取失败\n");
+		return false;
+	}
+    //
+    pfnNtQueryInformationProcess fnNtQueryInformationProcess = NULL;
+    
+}
